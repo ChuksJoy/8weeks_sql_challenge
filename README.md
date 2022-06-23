@@ -107,18 +107,73 @@ WHERE rank = 1;
 
 -- 7. Which item was purchased just before the customer became a member?
 
-With Rank as
+With prior_member_customer_purchase as
 (
 Select  sales.customer_id,
-        M.product_name,
-	Dense_rank() OVER (Partition by S.Customer_id Order by S.Order_date) as Rank
-From Sales S
-Join Menu M
+        members.join_date,
+  		sales.order_date,
+  		sales.product_id,
+	DENSE_RANK() OVER (PARTITION by sales.customer_id ORDER BY sales.order_date) as Rank
+From sales AS S
+Join Menu AS M
 ON m.product_id = s.product_id
 JOIN Members Mem
 ON Mem.Customer_id = S.customer_id
 Where S.order_date < Mem.join_date  
 )
-Select customer_ID, Product_name
-From Rank
-Where Rank = 1
+SELECT customer_ID, Product_name
+FROM Rank
+WHERE Rank = 1
+
+-- 8. What is the total items and amount spent for each member before they became a member?
+
+SELECT s.customer_id, COUNT(DISTINCT s.product_id) AS unique_menu_item, SUM(m.price) AS total_sales
+FROM dannys_diner.sales AS S
+JOIN dannys_diner.menu AS M
+ON M.customer_id = S.customer_id
+JOIN dannys_diner.members AS Mem
+ON Mem.product_id = S.product_id
+WHERE S.order_date < Mem.join_date
+GROUP BY s.customer_id;
+
+-- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+
+WITH Price_points AS
+(
+SELECT *, 
+CASE
+WHEN product_id = 1 THEN price * 20
+ELSE price * 10
+END AS points
+FROM dannys_diner.menu
+) SELECT S.customer_id, SUM(P.points) AS total_points
+FROM price_points AS P
+JOIN dannys_diner.sales AS S
+ON p.product_id = s.product_id
+GROUP BY s.customer_id 
+order by total_points desc
+;
+-- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+WITH dates AS 
+(
+   SELECT *, 
+      DATEADD(DAY, 6, join_date) AS valid_date, 
+      EOMONTH('2021-01-31') AS last_date
+   FROM members 
+)
+SELECT S.Customer_id, 
+       SUM(
+	   CASE 
+	  WHEN m.product_id = 1 THEN m.price*20
+	  WHEN S.order_date BETWEEN D.join_date AND D.valid_date THEN m.price*20
+	  Else m.price*10
+	  END 
+	  ) as Points
+From Dates AS D
+join Sales AS S
+On D.customer_id = S.customer_id
+Join Menu M
+On M.product_id = S.product_id
+Where S.order_date < d.last_date
+Group by S.customer_id
