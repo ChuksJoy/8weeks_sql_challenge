@@ -8,3 +8,16 @@ He maxed out his credit card to pay freelance developers to build a mobile app t
 Because Danny had a few years of experience as a data scientist - he was very aware that data collection was going to be critical for his business’ growth.
 All datasets exist within the pizza_runner database schema
 
+# Case Study Questions
+This case study has LOTS of questions - they are broken up by area of focus including:
+
+* Pizza Metrics
+* Runner and Customer Experience
+* Ingredient Optimisation
+* Pricing and Ratings
+* Bonus DML Challenges (DML = Data Manipulation Language)
+
+## Data Analysis Process
+* Data Cleaning and Transformation in the customer_orders and runner_orders tables provided.
+* Executing SQL syntax with the use of danny's DB Fibble in a bid to answer the questions
+
