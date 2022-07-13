@@ -1,1 +1,15 @@
-
+--- Data Cleaning 
+ 
+ --- Table Name: customer_order
+SELECT order_id, customer_id, pizza_id, 
+CASE
+	WHEN exclusions IS null OR exclusions LIKE 'null' THEN ' '
+	ELSE exclusions
+	END AS exclusions,
+CASE
+	WHEN extras IS NULL or extras LIKE 'null' THEN ' '
+	ELSE extras
+	END AS extras,
+	order_time
+INTO #customer_orders
+FROM customer_orders
