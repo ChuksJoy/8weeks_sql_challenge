@@ -1,5 +1,5 @@
 # Danny Ma's Case Study 2 - Pizza Runner
-You can find in-depth information about the data and entity-relationship of the case study [here].(https://8weeksqlchallenge.com/case-study-2/)
+You can find in-depth information about the data and entity-relationship of the case study [Here](https://8weeksqlchallenge.com/case-study-2/)
 
 # Background 
 Danny is expanding his new Pizza Empire and at the same time, he wants to Uberize it, so Pizza Runner was launched!
