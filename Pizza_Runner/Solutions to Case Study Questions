@@ -1,0 +1,20 @@
+-----------------------------
+-- A. Pizza Metrics ---------
+-----------------------------
+
+--- How many pizzas were ordered?
+
+SELECT COUNT(*) AS pizza_order_count
+FROM customer_orders;
+
+--- How many unique customer orders were made?
+
+SELECT COUNT(DISTINCT order_id) AS unique_order_count
+FROM customer_orders;
+
+--- How many successful orders were delivered by each runner?
+
+SELECT runner_id, COUNT(order_id) AS successful_orders
+FROM runner_ordersv1
+WHERE distance != 0
+GROUP BY runner_id;
