@@ -8,8 +8,8 @@ Danny started by recruiting “runners” to deliver fresh pizza from Pizza Runn
 He maxed out his credit card to pay freelance developers to build a mobile app to accept orders from customers.
 Because Danny had a few years of experience as a data scientist - he was very aware that data collection was going to be critical for his business’ growth.
 All datasets exist within the pizza_runner database schema
-![image](https://user-images.githubusercontent.com/86024012/178909220-d1a85a06-1281-4bb2-a34a-8612773b7ac6.png)
 
+![image](https://user-images.githubusercontent.com/86024012/178909401-b7fd50d6-ec10-408a-bd4c-4cc555042232.png)
 
 # Case Study Questions
 This case study has LOTS of questions - they are broken up by area of focus including:
