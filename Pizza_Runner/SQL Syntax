@@ -1,6 +1,8 @@
 --- Data Cleaning 
  
- --- Table Name: customer_order
+# From Table Name: customer_order
+we will clean the table data provided using the CASE function
+
 SELECT order_id, customer_id, pizza_id, 
 CASE
 	WHEN exclusions IS null OR exclusions LIKE 'null' THEN ' '
@@ -11,5 +13,5 @@ CASE
 	ELSE extras
 	END AS extras,
 	order_time
-INTO #customer_orders
-FROM customer_orders
+INTO customer_orders
+FROM pizza_runner.customer_orders
