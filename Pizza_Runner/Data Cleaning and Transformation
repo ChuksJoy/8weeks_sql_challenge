@@ -6,10 +6,10 @@
 -- By Joy Chuks-Nwosu
 -- Date: 14/07/2022
 
---- Cleaning the data in two tables 
+--- Cleaning the data in two tables; customer_order and runner_order
  
 # From Table Name: customer_order
-we will clean the table data provided using the CASE function
+we will clean the table data provided using the CASE function and making a temporary table
 
 SELECT order_id, customer_id, pizza_id, 
 CASE
@@ -24,15 +24,13 @@ CASE
 INTO customer_orders
 FROM pizza_runner.customer_orders
 
-
 ---TABLE: runner_orders
 
-exec sp_help runner_orders
-
---pickup_time - remove nulls and replace with ' '
---distance - remove km and nulls
---duration - remove minutes and nulls
---cancellation - remove NULL and null and replace with ' ' 
+#From this table, we will be cleaning the;
+-- pickup_time - remove the nulls and replace with ' '
+-- distance - contains units in km, remove km and nulls
+-- duration - remove the 'min', 'minute' 'minutes' and nulls
+-- cancellation - remove NULL and null and replace with ' ' 
 
 SELECT order_id, runner_id,  
 CASE
@@ -55,14 +53,10 @@ CASE
 	WHEN cancellation IS NULL or cancellation LIKE 'null' THEN ' '
 	ELSE cancellation
 	END AS cancellation
-INTO #runner_orders
+INTO runner_ordersv1
 FROM runner_orders
 
-ALTER TABLE #runner_orders
-ALTER COLUMN pickup_time DATETIME
-
-ALTER TABLE #runner_orders
-ALTER COLUMN distance FLOAT
-
-ALTER TABLE #runner_orders
-ALTER COLUMN duration INT
+ALTER TABLE runner_ordersv1
+ALTER COLUMN pickup_time TYPE DATETIME,
+ALTER COLUMN distance TYPE FLOAT,
+ALTER COLUMN duration TYPE INT;
