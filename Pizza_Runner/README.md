@@ -1,4 +1,5 @@
 # Danny Ma's Case Study 2 - Pizza Runner
+![Pizza Runner](https://8weeksqlchallenge.com/images/case-study-designs/2.png)
 You can find in-depth information about the data and entity-relationship of the case study [Here](https://8weeksqlchallenge.com/case-study-2/)
 
 # Background 
