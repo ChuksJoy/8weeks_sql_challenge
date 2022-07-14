@@ -2,19 +2,114 @@
 -- A. Pizza Metrics ---------
 -----------------------------
 
---- How many pizzas were ordered?
+---1. How many pizzas were ordered?
 
 SELECT COUNT(*) AS pizza_order_count
 FROM customer_orders;
 
---- How many unique customer orders were made?
+---2. How many unique customer orders were made?
 
 SELECT COUNT(DISTINCT order_id) AS unique_order_count
 FROM customer_orders;
 
---- How many successful orders were delivered by each runner?
+---3. How many successful orders were delivered by each runner?
 
 SELECT runner_id, COUNT(order_id) AS successful_orders
 FROM runner_ordersv1
-WHERE distance != 0
+WHERE distance != ''
 GROUP BY runner_id;
+
+"runner_id"	"successful_orders"
+    3	        2
+    2	        4
+    1	        4
+
+---4. How many of each type of pizza was delivered?
+
+SELECT p.pizza_name, COUNT(c.pizza_id) AS delivery_order_count
+FROM customer_orders AS c
+JOIN runner_ordersv1 AS r
+ ON c.order_id = r.order_id
+JOIN pizza_runner.pizza_names AS p
+ ON c.pizza_id = p.pizza_id
+WHERE r.distance != ''
+GROUP BY p.pizza_name;
+
+Result:  "pizza_name"	    "delivered_pizza_count"
+          "Meatlovers"	        10
+          "Vegetarian"	        4
+
+---5. How many Vegetarian and Meatlovers were ordered by each customer?
+
+SELECT c.customer_id, p.pizza_name, COUNT(p.pizza_name) AS customer_order_count
+FROM customer_orders AS c
+JOIN pizza_runner.pizza_names AS p
+ ON c.pizza_id= p.pizza_id
+GROUP BY c.customer_id, p.pizza_name
+ORDER BY c.customer_id;
+"customer_id"	  "pizza_name"	"customer_order_count"
+      101	      "Meatlovers"	      2
+      101	      "Vegetarian"	      1
+      102	      "Meatlovers"	      2
+      102	      "Vegetarian"	      1
+      103	      "Meatlovers"	      3
+      103	      "Vegetarian"	      1
+      104	      "Meatlovers"	      3
+      105	      "Vegetarian"	      1
+
+---6. What was the maximum number of pizzas delivered in a single order?
+WITH total_pizza_per_order AS
+(
+ SELECT c.order_id, COUNT(c.pizza_id) AS pizza_per_order
+ FROM customer_orders AS c
+ JOIN runner_ordersv1 AS r
+  ON c.order_id = r.order_id
+ WHERE r.distance != ''
+ GROUP BY c.order_id
+)
+
+SELECT MAX(pizza_per_order) AS max_no_of_pizzas_in_single_order
+FROM total_pizza_per_order
+
+Result: 3
+
+---7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+
+SELECT c.customer_id,
+	SUM(CASE 
+		WHEN c.exclusions <> ' ' OR c.extras <> ' ' THEN 1
+		ELSE 0
+		END) AS with_changes,
+	SUM(CASE 
+		WHEN c.exclusions = '' OR c.extras = ' ' THEN 1 
+		ELSE 0
+		END) AS no_changes
+FROM customer_orders AS c
+JOIN runner_ordersv1 AS r
+	ON c.order_id = r.order_id
+WHERE r.distance != ''
+GROUP BY c.customer_id
+ORDER BY c.customer_id
+
+"customer_id"	"with_changes"	"no_changes"
+      101	          2	            3
+      102	          2	            3
+      103         	4	            0
+      104         	2	            1
+      105	          1	            0
+      
+---8. How many pizzas were delivered that had both exclusions and extras?
+SELECT  
+ SUM(CASE
+  WHEN exclusions IS NOT NULL AND extras IS NOT NULL THEN 1
+  ELSE 0
+  END) AS pizza_count_w_exclusions_extras
+FROM #customer_orders AS c
+JOIN #runner_orders AS r
+ ON c.order_id = r.order_id
+WHERE r.distance >= 1 
+ AND exclusions <> ' ' 
+ AND extras <> ' ';
+ 
+---9. What was the total volume of pizzas ordered for each hour of the day?
+---10. What was the volume of orders for each day of the week?
