@@ -170,59 +170,77 @@ FROM dannys_diner.members;
 
 
 -- 6. Which item was purchased first by the customer after they became a member?
+**Query #6**
+SET search_path = dannys_diner
+    WITH First_member_sales AS 
+    (
+    SELECT customer_id, join_date, order_date, product_id,
+    DENSE_RANK() OVER(PARTITION BY customer_id
+    ORDER BY order_date) 
+    FROM sales s
+    JOIN members m
+    Using(customer_id)
+    WHERE s.order_date >= m.join_date
+    )
+    
+    SELECT customer_id, order_date, product_name 
+    FROM First_member_sales 
+    JOIN menu
+    USING(product_id)
+    WHERE dense_rank = 1;
 
-WITH Top_member_sales AS 
-(
-SELECT sales.customer_id, members.join_date, sales.order_date, sales.product_id,
-DENSE_RANK() OVER(PARTITION BY sales.customer_id
-ORDER BY sales.order_date) AS Rank
-FROM sales AS s
-JOIN members AS m
-ON menu.customer_id = sales.customer_id
-WHERE sales.order_date >= member.join_date
-)
+| customer_id | order_date               | product_name |
+| ----------- | ------------------------ | ------------ |
+| B           | 2021-01-11T00:00:00.000Z | sushi        |
+| A           | 2021-01-07T00:00:00.000Z | curry        |
 
-SELECT s.customer_id, s.order_date, m2.product_name 
-FROM top_member_sales AS s
-JOIN menu AS m2
-ON m2.product_id = s.product_id
-WHERE rank = 1;
 
 -- 7. Which item was purchased just before the customer became a member?
+**Query #7**
 
-With prior_member_customer_purchase as
-(
-Select  sales.customer_id,
-        members.join_date,
-  		sales.order_date,
-  		sales.product_id,
-	DENSE_RANK() OVER (PARTITION by sales.customer_id ORDER BY sales.order_date) as Rank
-From sales AS S
-Join Menu AS M
-ON m.product_id = s.product_id
-JOIN Members Mem
-ON Mem.Customer_id = S.customer_id
-Where S.order_date < Mem.join_date  
-)
-SELECT customer_ID, Product_name
-FROM Rank
-WHERE Rank = 1
+    With prior_member_customer_purchase as
+    (
+    Select  s.customer_id,join_date,order_date,product_id,
+    	DENSE_RANK() OVER (PARTITION by s.customer_id ORDER BY s.order_date) 
+    From sales s
+    Join Menu m
+    USING(product_id)
+    JOIN Members Mem
+    USING(customer_id)
+    Where s.order_date < Mem.join_date  
+    )
+    SELECT customer_id, product_name
+    FROM prior_member_customer_purchase
+    JOIN menu
+    USING(product_id)
+    WHERE Dense_Rank = 1;
+
+| customer_id | product_name |
+| ----------- | ------------ |
+| A           | sushi        |
+| A           | curry        |
+| B           | curry        |
+
+---
+
+[View on DB Fiddle](https://www.db-fiddle.com/f/2rM8RAnq7h5LLDTzZiRWcd/138)
 
 -- 8. What is the total items and amount spent for each member before they became a member?
+**Query #8**
 
-SSELECT s.customer_id, COUNT(DISTINCT s.product_id) AS unique_menu_item, SUM(m.price) AS total_sales
-FROM dannys_diner.sales AS s
-JOIN dannys_diner.members AS Mem
-ON Mem.customer_id = s.customer_id
-JOIN dannys_diner.menu AS m
-ON m.product_id = S.product_id
-WHERE S.order_date < mem.join_date
-GROUP BY s.customer_id;
+    SELECT s.customer_id, COUNT(DISTINCT s.product_id) AS total_item, SUM(m.price) AS total_sales
+    FROM sales s
+    JOIN members Mem
+    USING(customer_id)
+    JOIN menu m
+    USING(product_id)
+    WHERE S.order_date < mem.join_date
+    GROUP BY s.customer_id;
 
-Data Output
-"customer_id"	"unique_menu_item"	"total_sales"
-"A"	2	25
-"B"	2	40
+| customer_id | total_item       | total_sales |
+| ----------- | ---------------- | ----------- |
+| A           | 2                | 25          |
+| B           | 2                | 40          |
 
 
 -- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
