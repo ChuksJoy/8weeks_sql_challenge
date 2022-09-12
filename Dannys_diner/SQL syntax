@@ -1,3 +1,58 @@
+Schema:
+CREATE SCHEMA dannys_diner;
+SET search_path = dannys_diner;
+
+CREATE TABLE sales (
+  "customer_id" VARCHAR(1),
+  "order_date" DATE,
+  "product_id" INTEGER
+);
+
+INSERT INTO sales
+  ("customer_id", "order_date", "product_id")
+VALUES
+  ('A', '2021-01-01', '1'),
+  ('A', '2021-01-01', '2'),
+  ('A', '2021-01-07', '2'),
+  ('A', '2021-01-10', '3'),
+  ('A', '2021-01-11', '3'),
+  ('A', '2021-01-11', '3'),
+  ('B', '2021-01-01', '2'),
+  ('B', '2021-01-02', '2'),
+  ('B', '2021-01-04', '1'),
+  ('B', '2021-01-11', '1'),
+  ('B', '2021-01-16', '3'),
+  ('B', '2021-02-01', '3'),
+  ('C', '2021-01-01', '3'),
+  ('C', '2021-01-01', '3'),
+  ('C', '2021-01-07', '3');
+ 
+
+CREATE TABLE menu (
+  "product_id" INTEGER,
+  "product_name" VARCHAR(5),
+  "price" INTEGER
+);
+
+INSERT INTO menu
+  ("product_id", "product_name", "price")
+VALUES
+  ('1', 'sushi', '10'),
+  ('2', 'curry', '15'),
+  ('3', 'ramen', '12');
+  
+
+CREATE TABLE members (
+  "customer_id" VARCHAR(1),
+  "join_date" DATE
+);
+
+INSERT INTO members
+  ("customer_id", "join_date")
+VALUES
+  ('A', '2021-01-07'),
+  ('B', '2021-01-09');
+  
 Questions and their Solutions
 First let us View our Tables
 
@@ -10,65 +65,109 @@ FROM dannys_diner.members;
 
 -- 1. What is the total amount each customer spent at the restaurant?
 
-SELECT 
-	customer_id, 
-    SUM(price)
-FROM dannys_diner.menu 
-JOIN dannys_diner.sales
-On menu.product_id = sales.product_id
-GROUP BY customer_id
+**Query #1**
+
+    SELECT 
+    	customer_id, 
+        SUM(price)
+    FROM dannys_diner.menu 
+    JOIN dannys_diner.sales
+    On menu.product_id = sales.product_id
+    GROUP BY customer_id;
+
+| customer_id | sum |
+| ----------- | --- |
+| B           | 74  |
+| C           | 36  |
+| A           | 76  |
+
+---
+
 
 -- 2. How many days has each customer visited the restaurant?
 
-SELECT customer_id,
-COUNT (distinct (order_date)) 
-FROM  dannys_diner.sales
-GROUP BY customer_id 
+**Query #2**
 
+    SELECT customer_id,
+    COUNT (distinct (order_date)) 
+    FROM  dannys_diner.sales
+    GROUP BY customer_id;
+
+| customer_id | count |
+| ----------- | ----- |
+| A           | 4     |
+| B           | 6     |
+| C           | 2     |
 
 -- 3. What was the first item from the menu purchased by each customer?
 
-With FIRSTPURCHASE AS
-(
-SELECT sales.customer_id, 
-       menu.product_name, 
-       sales.order_date,
-       DENSE_RANK() OVER (PARTITION BY sales.Customer_ID ORDER BY sales.order_date) AS purchase_rank
-FROM dannys_diner.menu
-JOIN dannys_diner.sales
-ON menu.product_id = sales.product_id
-GROUP BY sales.customer_id, menu.product_name, sales.order_date
-)
-SELECT customer_id, product_name
-FROM firstpurchase
-WHERE purchase_rank = 1
+**Query #3**
+
+    With FIRSTPURCHASE AS
+    (
+    SELECT sales.customer_id, 
+           menu.product_name, 
+           sales.order_date,
+           DENSE_RANK() OVER (PARTITION BY sales.Customer_ID ORDER BY sales.order_date) AS purchase_rank
+    FROM dannys_diner.menu
+    JOIN dannys_diner.sales
+    ON menu.product_id = sales.product_id
+    GROUP BY sales.customer_id, menu.product_name, sales.order_date
+    )
+    SELECT customer_id, product_name
+    FROM firstpurchase
+    WHERE purchase_rank = 1;
+
+| customer_id | product_name |
+| ----------- | ------------ |
+| A           | curry        |
+| A           | sushi        |
+| B           | curry        |
+| C           | ramen        |
+
 
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+**Query #4**
 
-SELECT menu.product_name, COUNT(sales.product_id) AS Top 1
- FROM dannys_diner.menu
-    JOIN dannys_diner.sales
-    ON menu.product_id = sales.product_id
-    GROUP BY menu.product_name
-ORDER BY COUNT(sales.product_id) desc
-limit 1
+    SELECT menu.product_name, COUNT(sales.product_id) AS most_purchased
+     FROM dannys_diner.menu
+        JOIN dannys_diner.sales
+        ON menu.product_id = sales.product_id
+        GROUP BY menu.product_name
+    ORDER BY COUNT(sales.product_id) desc
+    limit 1;
+
+| product_name | most_purchased |
+| ------------ | -------------- |
+| ramen        | 8              |
+
 
 -- 5. Which item was the most popular for each customer?
+**Query #5**
 
-with Rank as(
-SELECT sales.customer_id,
-menu.product_name,
-COUNT(*) AS order_count,
-DENSE_RANK() OVER (PARTITION BY sales.customer_id
-ORDER BY COUNT(sales.customer_id)desc) as Rank
- FROM dannys_diner.menu
-    JOIN dannys_diner.sales
-    ON menu.product_id = sales.product_id
-GROUP BY sales.customer_id,menu.product_name
-)
-SELECT Customer_id,Product_name,order_Count
-FROM Rank
-WHERE Rank = 1
+    with MostPopular as(
+    SELECT sales.customer_id,
+    menu.product_name,
+    COUNT(*) AS order_count,
+    DENSE_RANK() OVER (PARTITION BY sales.customer_id
+    ORDER BY COUNT(sales.customer_id)desc) as Rank
+     FROM dannys_diner.menu
+        JOIN dannys_diner.sales
+        ON menu.product_id = sales.product_id
+    GROUP BY sales.customer_id,menu.product_name
+    )
+    SELECT Customer_id,Product_name,order_Count
+    FROM MostPopular
+    WHERE Rank = 1;
+
+| customer_id | product_name | order_count |
+| ----------- | ------------ | ----------- |
+| A           | ramen        | 3           |
+| B           | ramen        | 2           |
+| B           | curry        | 2           |
+| B           | sushi        | 2           |
+| C           | ramen        | 3           |
+
 
 -- 6. Which item was purchased first by the customer after they became a member?
 
