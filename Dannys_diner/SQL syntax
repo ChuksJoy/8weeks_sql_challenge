@@ -244,50 +244,75 @@ SET search_path = dannys_diner
 
 
 -- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+**Query #1**
 
-WITH Price_points AS
-(
-SELECT *, 
-CASE
-WHEN product_id = 1 THEN price * 20
-ELSE price * 10
-END AS points
-FROM dannys_diner.menu
-) SELECT S.customer_id, SUM(P.points) AS total_points
-FROM price_points AS P
-JOIN dannys_diner.sales AS S
-ON p.product_id = s.product_id
-GROUP BY s.customer_id 
-order by total_points desc
-;
+    SET search_path = dannys_diner;
 
-DataOutput
-"customer_id"	"total_points"
-"B"	940
-"A"	860
-"C"	360
+There are no results to be displayed.
+
+---
+**Query #9**
+
+    WITH dollar_points AS
+    (
+    SELECT *, 
+    CASE
+    WHEN product_id = 1 THEN price * 20
+    ELSE price * 10
+    END AS points
+    FROM menu
+    ) 
+    SELECT S.customer_id, SUM(d.points) AS total_points
+    FROM dollar_points d
+    JOIN sales s
+    USING(product_id)
+    GROUP BY s.customer_id 
+    order by total_points desc
+    ;
+
+| customer_id | total_points |
+| ----------- | ------------ |
+| B           | 940          |
+| A           | 860          |
+| C           | 360          |
+
 
 -- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 
-WITH dates AS 
-(
-   SELECT *, 
-      DATEADD(DAY, 6, join_date) AS valid_date, 
-      EOMONTH('2021-01-31') AS last_date
-   FROM members 
-)
-SELECT S.Customer_id, 
-       SUM(
-	   CASE 
-	  WHEN m.product_id = 1 THEN m.price*20
-	  WHEN S.order_date BETWEEN D.join_date AND D.valid_date THEN m.price*20
-	  Else m.price*10
-	  END 
-	  ) as Points
-From Dates AS D
-join Sales AS S
-On D.customer_id = S.customer_id
-Join Menu M
-On M.product_id = S.product_id
-Where S.order_date < d.last_date
-Group by S.customer_id
+**Query #1**
+
+    SET search_path = dannys_diner;
+
+There are no results to be displayed.
+
+---
+**Query #10**
+
+    WITH dates AS 
+    (
+       SELECT *, 
+          DATE_TRUNC('Week', join_date) AS join_first_week, date_trunc('month', join_date) + interval '1 month' - interval '1 day' as last_date
+       FROM members 
+       
+    )
+    SELECT S.Customer_id, 
+           SUM(
+    	   CASE 
+    	  WHEN m.product_id = 1 THEN m.price*20
+    	  WHEN S.order_date BETWEEN D.join_date AND D.join_first_week THEN m.price*20
+    	  Else m.price*10
+    	  END 
+    	  ) as Points
+    From Dates AS D
+    join Sales AS S
+    On D.customer_id = S.customer_id
+    Join Menu M
+    On M.product_id = S.product_id
+    Where S.order_date < d.last_date
+    Group by S.customer_id;
+
+| customer_id | points |
+| ----------- | ------ |
+| B           | 820    |
+| A           | 860    |
+
