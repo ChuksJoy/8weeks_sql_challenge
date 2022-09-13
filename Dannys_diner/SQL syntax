@@ -303,8 +303,8 @@ There are no results to be displayed.
     	  Else m.price*10
     	  END 
     	  ) as Points
-    From Dates AS D
-    join Sales AS S
+    From Dates D
+    join Sales S
     On D.customer_id = S.customer_id
     Join Menu M
     On M.product_id = S.product_id
