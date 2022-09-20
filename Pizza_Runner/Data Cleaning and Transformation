@@ -78,7 +78,7 @@ There are no results to be displayed.
 ---
 **Query #3**
 
-    CREATE TEMP TABLE runner_orders_cleaned AS (
+    CREATE TEMP TABLE temp_runner_orders AS (
     SELECT order_id, runner_id,
     CASE
     	WHEN pickup_time LIKE 'null' THEN ' '
@@ -108,7 +108,7 @@ There are no results to be displayed.
 ---
 **Query #4**
 
-    SELECT * FROM runner_orders_cleaned;
+    SELECT * FROM temp_runner_orders;
 
 | order_id | runner_id | pickup_time         | distance | duration | cancellation            |
 | -------- | --------- | ------------------- | -------- | -------- | ----------------------- |
