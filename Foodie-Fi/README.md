@@ -1,4 +1,4 @@
-#Foodie-Fi
+# Foodie-Fi
 ![Foodie-Fi](https://8weeksqlchallenge.com/images/case-study-designs/3.png)
 Complete Information about this case Study can be found [here](https://8weeksqlchallenge.com/case-study-3/)
 
@@ -10,7 +10,7 @@ Danny has shared the data design for Foodie-Fi and also short descriptions on ea
 ## Entity Relationship Diagram
 ![ERD](https://8weeksqlchallenge.com/images/case-study-3-erd.png)
 
-##Data Analysis Questions
+## Data Analysis Questions
 * How many customers has Foodie-Fi ever had?
 * What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
 * What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
