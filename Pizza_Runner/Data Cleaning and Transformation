@@ -33,8 +33,10 @@ There are no results to be displayed.
 
 ---
 **Query #2**
-
-    SELECT * FROM temp_customer_orders;
+Delete from customer_orders;
+Insert into customer_orders
+Select * from temp_customer_orders;
+select * from customer_orders
 
 | order_id | customer_id | pizza_id | exclusions | extras | order_time               |
 | -------- | ----------- | -------- | ---------- | ------ | ------------------------ |
@@ -71,44 +73,52 @@ There are no results to be displayed.
 ---
 **Query #2**
 
-    DROP TABLE IF EXISTS temp_runner_orders;
+    CREATE TEMP TABLE temp_runner_orders AS (
+        SELECT order_id, runner_id,
+        CASE
+        	WHEN pickup_time LIKE 'null' THEN ' '
+        	ELSE pickup_time
+        	END AS pickup_time,
+        CASE
+        	WHEN distance LIKE 'null' THEN ' '
+        	WHEN distance LIKE '%km' THEN TRIM('km' from distance)
+        	ELSE distance
+        	END AS distance,
+        CASE
+        	WHEN duration LIKE 'null' THEN ' '
+        	WHEN duration LIKE '%mins' THEN TRIM('mins' from duration)
+        	WHEN duration LIKE '%minute' THEN TRIM('minute' from duration)
+        	WHEN duration LIKE '%minutes' THEN TRIM('minutes' from duration)
+        	ELSE duration
+        	END AS duration,
+        CASE
+        	WHEN cancellation IS NULL or cancellation LIKE 'null' THEN ' '
+        	ELSE cancellation
+        	END AS cancellation
+        FROM pizza_runner.runner_orders
+        );
 
 There are no results to be displayed.
 
 ---
 **Query #3**
 
-    CREATE TEMP TABLE temp_runner_orders AS (
-    SELECT order_id, runner_id,
-    CASE
-    	WHEN pickup_time LIKE 'null' THEN ' '
-    	ELSE pickup_time
-    	END AS pickup_time,
-    CASE
-    	WHEN distance LIKE 'null' THEN ' '
-    	WHEN distance LIKE '%km' THEN TRIM('km' from distance)
-    	ELSE distance
-    	END AS distance,
-    CASE
-    	WHEN duration LIKE 'null' THEN ' '
-    	WHEN duration LIKE '%mins' THEN TRIM('mins' from duration)
-    	WHEN duration LIKE '%minute' THEN TRIM('minute' from duration)
-    	WHEN duration LIKE '%minutes' THEN TRIM('minutes' from duration)
-    	ELSE duration
-    	END AS duration,
-    CASE
-    	WHEN cancellation IS NULL or cancellation LIKE 'null' THEN ' '
-    	ELSE cancellation
-    	END AS cancellation
-    FROM pizza_runner.runner_orders
-    );
+    Delete from runner_orders;
 
 There are no results to be displayed.
 
 ---
 **Query #4**
 
-    SELECT * FROM temp_runner_orders;
+    Insert into runner_orders
+    Select * from temp_runner_orders;
+
+There are no results to be displayed.
+
+---
+**Query #5**
+
+    select * from runner_orders;
 
 | order_id | runner_id | pickup_time         | distance | duration | cancellation            |
 | -------- | --------- | ------------------- | -------- | -------- | ----------------------- |
@@ -122,6 +132,8 @@ There are no results to be displayed.
 | 8        | 2         | 2020-01-10 00:15:02 | 23.4     | 15       |                         |
 | 9        | 2         |                     |          |          | Customer Cancellation   |
 | 10       | 1         | 2020-01-11 18:50:20 | 10       | 10       |                         |
+
+---
 
 
 ALTER COLUMN pickup_time TYPE DATETIME,
