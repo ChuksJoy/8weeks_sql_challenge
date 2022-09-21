@@ -1,4 +1,5 @@
 # Dannys_Diner
+![Danny_diner](https://8weeksqlchallenge.com/images/case-study-designs/1.png)
 This is part of Danny Ma's 8 weeks SQL challenge. You can find the challenge on his LinkedIn Profile @ Danny Ma or [here](https://8weeksqlchallenge.com/case-study-1/).
 
 ## Background
