@@ -56,78 +56,128 @@ There are no results to be displayed.
 
 
 ---4. How many of each type of pizza was delivered?
+**Query #1**
 
-SELECT p.pizza_name, COUNT(c.pizza_id) AS delivery_order_count
-FROM customer_orders AS c
-JOIN runner_orders AS r
- ON c.order_id = r.order_id
-JOIN pizza_runner.pizza_names AS p
- ON c.pizza_id = p.pizza_id
-WHERE r.distance != ''
-GROUP BY p.pizza_name;
+    SET search_path = pizza_runner;
 
-Result:  "pizza_name"	    "delivered_pizza_count"
-          "Meatlovers"	        10
-          "Vegetarian"	        4
+There are no results to be displayed.
+
+---
+**Query #2**
+
+    SELECT pizza_name, COUNT(pizza_id) AS pizza_delivered
+    FROM customer_orders 
+    JOIN runner_orders 
+     USING (order_id)
+    JOIN pizza_names 
+     USING (pizza_id)
+    WHERE distance != ''
+    GROUP BY pizza_name;
+
+| pizza_name | pizza_delivered |
+| ---------- | --------------- |
+| Meatlovers | 10              |
+| Vegetarian | 4               |
+
 
 ---5. How many Vegetarian and Meatlovers were ordered by each customer?
+**Query #1**
 
-SELECT c.customer_id, p.pizza_name, COUNT(p.pizza_name) AS customer_order_count
-FROM customer_orders AS c
-JOIN pizza_runner.pizza_names AS p
- ON c.pizza_id= p.pizza_id
-GROUP BY c.customer_id, p.pizza_name
-ORDER BY c.customer_id;
-"customer_id"	  "pizza_name"	"customer_order_count"
-      101	      "Meatlovers"	      2
-      101	      "Vegetarian"	      1
-      102	      "Meatlovers"	      2
-      102	      "Vegetarian"	      1
-      103	      "Meatlovers"	      3
-      103	      "Vegetarian"	      1
-      104	      "Meatlovers"	      3
-      105	      "Vegetarian"	      1
+    SET search_path = pizza_runner;
+
+There are no results to be displayed.
+
+---
+**Query #2**
+
+    SELECT customer_id, 
+     SUM(
+            CASE
+                WHEN pizza_id = 1 THEN 1
+                ELSE 0
+            END
+        ) as meatlovers,
+        SUM(
+            CASE
+                WHEN pizza_id = 2 THEN 1
+                ELSE 0
+            END
+        ) as vegetarians
+        FROM customer_orders 
+    GROUP BY customer_id
+    ORDER BY customer_id;
+
+| customer_id | meatlovers | vegetarians |
+| ----------- | ---------- | ----------- |
+| 101         | 2          | 1           |
+| 102         | 2          | 1           |
+| 103         | 3          | 1           |
+| 104         | 3          | 0           |
+| 105         | 0          | 1           |
+
 
 ---6. What was the maximum number of pizzas delivered in a single order?
-WITH total_pizza_per_order AS
-(
- SELECT c.order_id, COUNT(c.pizza_id) AS pizza_per_order
- FROM customer_orders AS c
- JOIN runner_ordersv1 AS r
-  ON c.order_id = r.order_id
- WHERE r.distance != ''
- GROUP BY c.order_id
-)
+**Query #1**
 
-SELECT MAX(pizza_per_order) AS max_no_of_pizzas_in_single_order
-FROM total_pizza_per_order
+    SET search_path = pizza_runner;
 
-Result: 3
+There are no results to be displayed.
+
+---
+**Query #2**
+
+    WITH total_pizza_per_order AS
+    (
+     SELECT order_id, COUNT(pizza_id) AS pizza_per_order
+     FROM customer_orders 
+     JOIN runner_orders
+      USING (order_id)
+     WHERE distance != ''
+     GROUP BY order_id
+    )
+    
+    SELECT MAX(pizza_per_order) AS max_no_of_pizzas_in_single_order
+    FROM total_pizza_per_order;
+
+| max_no_of_pizzas_in_single_order |
+| -------------------------------- |
+| 3                                |
+
 
 ---7. For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+**Query #1**
 
-SELECT c.customer_id,
-	SUM(CASE 
-		WHEN c.exclusions <> ' ' OR c.extras <> ' ' THEN 1
-		ELSE 0
-		END) AS with_changes,
-	SUM(CASE 
-		WHEN c.exclusions = '' OR c.extras = ' ' THEN 1 
-		ELSE 0
-		END) AS no_changes
-FROM customer_orders AS c
-JOIN runner_ordersv1 AS r
-	ON c.order_id = r.order_id
-WHERE r.distance != ''
-GROUP BY c.customer_id
-ORDER BY c.customer_id
+    SET search_path = pizza_runner;
 
-"customer_id"	"with_changes"	"no_changes"
-      101	          2	            3
-      102	          2	            3
-      103         	4	            0
-      104         	2	            1
-      105	          1	            0
+There are no results to be displayed.
+
+---
+**Query #2**
+
+    SELECT 
+        customer_id,
+        SUM(CASE
+            WHEN exclusions != ' ' OR extras != ' ' THEN 1
+            ELSE 0
+    		END) AS changes,
+        SUM(CASE
+            WHEN exclusions = ' ' AND extras = ' ' THEN 1
+            ELSE 0
+    		END) AS no_changes
+    FROM customer_orders 
+    JOIN runner_orders  
+    USING(order_id)
+    WHERE distance != ' '
+    GROUP BY customer_id;
+
+| customer_id | changes | no_changes |
+| ----------- | ------- | ---------- |
+| 101         | 3       | 0          |
+| 103         | 4       | 0          |
+| 104         | 3       | 0          |
+| 105         | 1       | 0          |
+| 102         | 3       | 0          |
+
       
 ---8. How many pizzas were delivered that had both exclusions and extras?
 SELECT  
