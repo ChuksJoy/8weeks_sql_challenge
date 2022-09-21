@@ -9,6 +9,9 @@ He maxed out his credit card to pay freelance developers to build a mobile app t
 Because Danny had a few years of experience as a data scientist - he was very aware that data collection was going to be critical for his business’ growth.
 All datasets exist within the pizza_runner database schema
 
+## Entity Relationship Diagram
+![image](https://user-images.githubusercontent.com/86024012/191452462-4e74b798-b9bb-4f39-ad20-2a07ac5ef658.png)
+
 # Case Study Questions
 This case study has LOTS of questions - they are broken up by area of focus including:
 
