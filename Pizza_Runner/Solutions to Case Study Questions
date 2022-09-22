@@ -180,17 +180,35 @@ There are no results to be displayed.
 
       
 ---8. How many pizzas were delivered that had both exclusions and extras?
-SELECT  
- SUM(CASE
-  WHEN exclusions IS NOT NULL AND extras IS NOT NULL THEN 1
-  ELSE 0
-  END) AS pizza_count_w_exclusions_extras
-FROM #customer_orders AS c
-JOIN #runner_orders AS r
- ON c.order_id = r.order_id
-WHERE r.distance >= 1 
- AND exclusions <> ' ' 
- AND extras <> ' ';
+**Query #1**
+
+    SET search_path = pizza_runner;
+
+There are no results to be displayed.
+
+---
+**Query #2**
+
+    SELECT SUM(
+            CASE
+                WHEN (
+                    exclusions IS NOT NULL
+                    AND extras IS NOT NULL
+                ) THEN 1
+                ELSE 0
+            END
+        ) as exclusions_and_extra
+    FROM customer_orders
+    JOIN runner_orders
+    USING(order_id)
+    WHERE distance >= '1'
+     AND exclusions <> ' ' 
+     AND extras <> ' ';
+
+| exclusions_and_extra |
+| -------------------- |
+| 13                   |
+
  
 ---9. What was the total volume of pizzas ordered for each hour of the day?
 ---10. What was the volume of orders for each day of the week?
