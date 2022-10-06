@@ -211,4 +211,52 @@ There are no results to be displayed.
 
  
 ---9. What was the total volume of pizzas ordered for each hour of the day?
+**Query #1**
+
+    SET search_path = pizza_runner;
+
+There are no results to be displayed.
+
+---
+**Query #2**
+
+    SELECT Extract( hour from order_time) As hour_of_day,
+    count(pizza_id) As Pizza_count
+    FROM customer_orders
+    Group By hour_of_day
+    Order By hour_of_day;
+
+| hour_of_day | pizza_count |
+| ----------- | ----------- |
+| 11          | 1           |
+| 13          | 3           |
+| 18          | 3           |
+| 19          | 1           |
+| 21          | 3           |
+| 23          | 3           |
+
+
 ---10. What was the volume of orders for each day of the week?
+
+**Query #1**
+
+    SET search_path = pizza_runner;
+
+There are no results to be displayed.
+
+---
+**Query #2**
+
+    SELECT TO_CHAR(order_time, 'day') AS day_of_week,
+    count(pizza_id) As Pizza_count
+    FROM customer_orders
+    Group By day_of_week
+    Order By day_of_week;
+
+| day_of_week | pizza_count |
+| ----------- | ----------- |
+| friday      | 1           |
+| saturday    | 5           |
+| thursday    | 3           |
+| wednesday   | 5           |
+
